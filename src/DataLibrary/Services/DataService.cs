@@ -1,9 +1,8 @@
-﻿using DataLibrary;
-using DataLibrary.Models;
-using ModelsLibrary.Models;
+﻿using ConnectionLogger.Data.Models;
+using ConnectionLogger.Messaging.Messages;
 using Microsoft.EntityFrameworkCore;
 
-namespace CommonData.Services;
+namespace ConnectionLogger.Data.Services;
 
 public class DataService : IDataService
 {
@@ -87,21 +86,21 @@ public class DataService : IDataService
 
         query = query.Where(c => c.UserId == userId);
 
-        if (orderBy == OrderBy.dateCreated)
+        if (orderBy == OrderBy.DateCreated)
         {
-            query = direction == Direction.asc
+            query = direction == Direction.Asc
                 ? query.OrderBy(c => c.ConnectedAt)
                 : query.OrderByDescending(c => c.ConnectedAt);
         }
-        else if (orderBy == OrderBy.ipAddress)
+        else if (orderBy == OrderBy.IpAddress)
         {
-            query = direction == Direction.asc
+            query = direction == Direction.Asc
                 ? query.OrderBy(c => c.IpAddressId)
                 : query.OrderByDescending(c => c.IpAddressId);
         }
-        else if (orderBy == OrderBy.userId)
+        else if (orderBy == OrderBy.UserId)
         {
-            query = direction == Direction.asc
+            query = direction == Direction.Asc
                 ? query.OrderBy(c => c.UserId)
                 : query.OrderByDescending(c => c.UserId);
         }

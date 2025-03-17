@@ -1,7 +1,7 @@
-﻿using DataLibrary.Models;
+﻿using ConnectionLogger.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataLibrary;
+namespace ConnectionLogger.Data;
 
 public class AppDbContext : DbContext
 {
