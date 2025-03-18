@@ -9,24 +9,20 @@ using System.Net.Sockets;
 [Route("api/users")]
 public class UserController : ControllerBase
 {
-    private readonly IRequestProduser _requestProduser;
-    private readonly IApiService _apiService;
+    private readonly IRequestProducer _requestProduser;
+    private const string IPv4 = "IPv4";
+    private const string IPv6 = "IPv6";
+    private const string Unknown = "Unknown";
+    private const string Invalid = "Invalid";
 
-    public UserController(IRequestProduser requestProduser, IApiService userService)
+    public UserController(IRequestProducer requestProduser)
     {
         _requestProduser = requestProduser;
-        _apiService = userService;
     }
 
-    /// <summary>
-    /// Через RabbitMQ
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="request"></param>
-    /// <returns></returns>
     [HttpPost]
     [Route("{userId}/connect")]
-    public async Task<IActionResult> ConnectUser(long userId, [FromBody] UserConnection request)
+    public async Task<IActionResult> Connect(long userId, [FromBody] Connection request)
     {
         if (request == null || !IsValidIp(request.Ip))
         {
@@ -58,14 +54,12 @@ public class UserController : ControllerBase
 
     private string GetIpProtocol(string ipAddress)
     {
-        if (IPAddress.TryParse(ipAddress, out IPAddress ip))
+        return IPAddress.TryParse(ipAddress, out var ip) ? ip.AddressFamily switch
         {
-            return ip.AddressFamily == AddressFamily.InterNetwork ? "IPv4" :
-                   ip.AddressFamily == AddressFamily.InterNetworkV6 ? "IPv6" :
-                   "Unknown";
-        }
-
-        return "Invalid";
+            AddressFamily.InterNetwork => IPv4,
+            AddressFamily.InterNetworkV6 => IPv6,
+            _ => Unknown
+        } : Invalid;
     }
 
     private bool IsValidIp(string ipAddress)
