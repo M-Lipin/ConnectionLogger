@@ -44,6 +44,7 @@ services:
       - my_network
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+
   connectionlogger_api:
     build:
       context: .
@@ -52,7 +53,7 @@ services:
     ports:
       - "5101:5100"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5100
       - DOTNET_RUNNING_IN_CONTAINER=true
     restart: "no"
@@ -64,6 +65,7 @@ services:
     deploy:
       restart_policy:
         condition: none
+
   connectionlogger_asyncreceiver:
     build:
       context: .
@@ -72,7 +74,7 @@ services:
     ports:
       - "5201:5200"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5200
       - DOTNET_RUNNING_IN_CONTAINER=true
     networks:
