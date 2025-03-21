@@ -5,7 +5,7 @@ using System.Text.Json;
 public class Program
 {
     private static readonly HttpClient client = new HttpClient();
-    private static string host = "https://localhost:";
+    private static string host = "http://localhost:";
 
     static async Task Main()
     {

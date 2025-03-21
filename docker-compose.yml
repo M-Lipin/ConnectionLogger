@@ -1,20 +1,18 @@
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:16
+    image: postgres:13
     restart: always
     container_name: postgres_container
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: ConnectionLoggedDb
+      POSTGRES_DB: ConnectionLoggerDb
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
     networks:
-      - my_network
+      - connection_logger_network
 
   pgadmin:
     image: dpage/pgadmin4
@@ -25,7 +23,7 @@ services:
     ports:
       - "8082:80"
     networks:
-      - my_network
+      - connection_logger_network
     depends_on:
       - postgres
     volumes:
@@ -41,10 +39,9 @@ services:
       - "5672:5672"
       - "15672:15672"
     networks:
-      - my_network
+      - connection_logger_network
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-
   connectionlogger_api:
     build:
       context: .
@@ -56,16 +53,15 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5100
       - DOTNET_RUNNING_IN_CONTAINER=true
-    restart: "no"
     networks:
-      - my_network
+      - connection_logger_network
     depends_on:
       - postgres
       - rabbitmq
     deploy:
       restart_policy:
         condition: none
-
+    entrypoint: ["sh", "-c", "sleep 30 && dotnet ConnectionLogger.Api.dll"]
   connectionlogger_asyncreceiver:
     build:
       context: .
@@ -78,8 +74,7 @@ services:
       - ASPNETCORE_URLS=http://+:5200
       - DOTNET_RUNNING_IN_CONTAINER=true
     networks:
-      - my_network
-    restart: "no"
+      - connection_logger_network
     depends_on:
       - rabbitmq
     deploy:
@@ -92,5 +87,5 @@ volumes:
   rabbitmq_data:
 
 networks:
-  my_network:
+  connection_logger_network:
     driver: bridge
