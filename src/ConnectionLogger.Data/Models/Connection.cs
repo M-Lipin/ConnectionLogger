@@ -1,14 +1,14 @@
 ﻿namespace ConnectionLogger.Data.Models;
 
-public class Connection
+public record Connection
 {
     public long UserId { get; init; }
 
-    public User? User { get; set; }
+    public required User User { get; init; }
 
-    public long IpAddressId { get; set; }
+    public long IpAddressId { get; init; }
 
-    public IpAddress? IpAddress { get; set; }
+    public required IpAddress IpAddress { get; init; }
 
-    public DateTime ConnectedAt { get; set; } = DateTime.Now;
+    public DateTime ConnectedAt { get; init; } = DateTime.Now;
 }

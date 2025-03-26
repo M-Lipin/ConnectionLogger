@@ -14,7 +14,7 @@ public class ConnectUserHandler : MessageHandler<ConnectUserMessage>
     public ConnectUserHandler(IServiceScopeFactory serviceScopeFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
-        var _options = new JsonSerializerOptions
+        _options = new JsonSerializerOptions
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             WriteIndented = false
@@ -41,9 +41,12 @@ public class ConnectUserHandler : MessageHandler<ConnectUserMessage>
 
             using (var scope = _serviceScopeFactory.CreateScope())
             {
-                var dataService = scope.ServiceProvider.GetRequiredService<IDataService>();
+                var connectionService = scope.ServiceProvider.GetRequiredService<IConnectionService>();
 
-                var result = await dataService.SaveConnectionAsync(connectionRequest.UserId, connectionRequest.IpAddress, connectionRequest.Protocol);
+                var result = await connectionService.SaveConnectionAsync
+                    (connectionRequest.UserId,
+                    connectionRequest.IpAddress,
+                    connectionRequest.Protocol);
 
                 var response = new ResponseResult()
                 {

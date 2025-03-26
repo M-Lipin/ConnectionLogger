@@ -4,22 +4,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ConnectionLogger.Data.Services;
 
-public class DataService : IDataService
+public class ConnectionService : IConnectionService
 {
     private readonly AppDbContext _dbContext;
 
-    public DataService(AppDbContext dbContext)
+    public ConnectionService(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public async Task<IpAddress?> GetAddressAsync(long id)
-    {
-        return await _dbContext.IpAddresses.FindAsync(id);
-    }
-
     public async Task<Connection> SaveConnectionAsync(long userId, string address, string protocol)
     {
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
         try
         {
             var ipAddress = await _dbContext.IpAddresses
@@ -35,14 +32,20 @@ public class DataService : IDataService
             var user = await _dbContext.Users.FindAsync(userId);
             if (user == null)
             {
-                user = new User { Id = userId, FirstName = "unknown", LastName = "unknown" };
+                // TODO: Consider passing user's FirstName and LastName.
+                user = new User { Id = userId, FirstName = "Ivan", LastName = "Ivanov" };
                 await _dbContext.Users.AddAsync(user);
                 await _dbContext.SaveChangesAsync();
             }
 
-            var existingConnection = await _dbContext.Connections
-                .FirstOrDefaultAsync(c => c.UserId == user.Id && c.IpAddressId == ipAddress.Id &&
-                                          c.ConnectedAt.Date == DateTime.UtcNow.Date);
+            DateTime now = DateTime.UtcNow;
+            var existingConnection = await _dbContext.Connections.FirstOrDefaultAsync(c =>
+                c.UserId == user.Id &&
+                c.IpAddressId == ipAddress.Id &&
+                c.ConnectedAt.Date == now.Date &&
+                c.ConnectedAt.Hour == now.Hour &&
+                c.ConnectedAt.Minute == now.Minute &&
+                c.ConnectedAt.Second == now.Second);
 
             if (existingConnection != null)
             {
@@ -53,7 +56,7 @@ public class DataService : IDataService
             {
                 User = user,
                 IpAddress = ipAddress,
-                ConnectedAt = DateTime.UtcNow
+                ConnectedAt = now
             };
 
             await _dbContext.Connections.AddAsync(connection);
@@ -63,29 +66,12 @@ public class DataService : IDataService
         }
         catch (Exception ex)
         {
-            throw new Exception("Error when saving a connection", ex);
+            await transaction.RollbackAsync();
+            throw new ApplicationException("Connection saving failed.", ex);
         }
     }
 
-    public async Task<List<long>> GetUsersByIpAsync(string ipPart, string protocol)
-    {
-        return await _dbContext.Connections
-            .OrderBy(c => c.IpAddress.Protocol)
-            .Where(c => c.IpAddress.Address.StartsWith(ipPart) && c.IpAddress.Protocol == protocol)
-            .Select(c => c.UserId)
-            .Distinct()
-            .ToListAsync();
-    }
-
-    public async Task<List<string>> GetUserIpsAsync(long userId)
-    {
-        return await _dbContext.Connections
-            .Where(c => c.UserId == userId)
-            .Select(c => c.IpAddress.Address)
-            .ToListAsync();
-    }
-
-    public async Task<Connection> GetLatestConnectionAsync(long userId, OrderBy orderBy, Direction direction)
+    public async Task<List<Connection>> GetConnectionsAsync(long userId, OrderBy orderBy, Direction direction)
     {
         var query = _dbContext.Connections.AsQueryable();
 
@@ -103,17 +89,11 @@ public class DataService : IDataService
                 ? query.OrderBy(c => c.IpAddressId)
                 : query.OrderByDescending(c => c.IpAddressId);
         }
-        else if (orderBy == OrderBy.UserId)
-        {
-            query = direction == Direction.Asc
-                ? query.OrderBy(c => c.UserId)
-                : query.OrderByDescending(c => c.UserId);
-        }
         else
         {
-            throw new ArgumentException("Invalid orderBy value");
+            throw new NotSupportedException($"Ordering by {orderBy} is not supported.");
         }
 
-        return await query.FirstOrDefaultAsync();
+        return await query.ToListAsync();
     }
 }

@@ -4,5 +4,5 @@ namespace ConnectionLogger.Api.Configurations;
 
 public class AppSettings : AppSettingsBase
 {
-    public required ConnectionStringsSettings ConnectionStrings { get; set; }
+    public required ConnectionStringsSettings ConnectionStrings { get; init; }
 }

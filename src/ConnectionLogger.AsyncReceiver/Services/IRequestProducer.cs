@@ -1,4 +1,4 @@
-﻿namespace ConnectionLogger.AsyncReceiver.Interfaces;
+﻿namespace ConnectionLogger.AsyncReceiver.Services;
 
 public interface IRequestProducer
 {

@@ -6,19 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/users")]
 public class UserController : ControllerBase
 {
-    protected readonly ILogger<UserController> _logger;
-    private readonly IDataService _dataService;
-    public UserController(IDataService dataService, ILogger<UserController> logger)
-    {
-        _logger = logger;
-        _dataService = dataService;
-    }
+    private readonly IUserService _userService;
 
-    [HttpGet("{id}")]
-    public IActionResult GetData(int id)
+    public UserController(IUserService userService)
     {
-        var response = new { Id = id, Message = $"Данные для ID {id}" };
-        return Ok(response);
+        _userService = userService;
     }
 
     [HttpGet("search")]
@@ -26,11 +18,11 @@ public class UserController : ControllerBase
     {
         var message = new SearchUsersByIpPartMessage()
         {
-            Ip = ipPart,
+            IpPart = ipPart,
             Protocol = protocol
         };
 
-        var result = await _dataService.GetUsersByIpAsync(message.Ip, message.Protocol);
+        var result = await _userService.SearchUsersByIpPartAsync(message.IpPart, message.Protocol);
 
         return Ok(result);
     }
@@ -43,8 +35,8 @@ public class UserController : ControllerBase
             UserId = userId
         };
 
-        var result = await _dataService.GetUserIpsAsync(userId);
+        var result = await _userService.GetUserIpsAsync(userId);
 
-        return Ok(new { Response = result });
+        return Ok(result);
     }
 }

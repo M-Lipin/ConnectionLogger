@@ -1,5 +1,4 @@
 using ConnectionLogger.AsyncReceiver.Configurations;
-using ConnectionLogger.AsyncReceiver.Interfaces;
 using ConnectionLogger.AsyncReceiver.Services;
 
 var builder = WebApplication.CreateBuilder(args);

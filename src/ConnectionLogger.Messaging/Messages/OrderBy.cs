@@ -3,6 +3,5 @@
 public enum OrderBy
 {
     DateCreated,
-    IpAddress,
-    UserId
+    IpAddress
 }

@@ -15,7 +15,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-builder.Services.AddScoped<IDataService, DataService>();
+builder.Services.AddScoped<IConnectionService, ConnectionService>();
 
 // Регистрация обработчиков сообщений из RabbitMQ
 builder.Services.AddSingleton<IMessageHandler, ConnectUserHandler>();

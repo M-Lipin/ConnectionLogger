@@ -2,14 +2,14 @@
 
 namespace ConnectionLogger.Data.Models;
 
-public class User
+public record User
 {
     [Key]
-    public long Id { get; set; }
+    public long Id { get; init; }
 
     [MaxLength(45)]
-    public required string LastName { get; set; }
+    public required string LastName { get; init; }
 
     [MaxLength(45)]
-    public required string FirstName { get; set; }
+    public required string FirstName { get; init; }
 }

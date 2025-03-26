@@ -14,8 +14,8 @@ public class RequestConsumerService : BackgroundService, IDisposable
     private readonly RabbitMQSettings _rabbitMqSettings;
     private readonly string _queueName;
 
-    private IConnection _connection;
-    private IChannel _channel;
+    private IConnection? _connection;
+    private IChannel? _channel;
 
     private readonly IEnumerable<IMessageHandler> _handlers;
 
@@ -50,7 +50,6 @@ public class RequestConsumerService : BackgroundService, IDisposable
                                          arguments: null);
 
         await _channel.ExchangeDeclareAsync(exchange: "headers_exchange", type: ExchangeType.Headers);
-
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -61,23 +60,27 @@ public class RequestConsumerService : BackgroundService, IDisposable
         }
 
         var consumer = new AsyncEventingBasicConsumer(_channel);
-        consumer.ReceivedAsync += async (model, ea) =>
+        consumer.ReceivedAsync += async (model, args) =>
         {
             try
             {
-                if (ea == null)
+                if (args == null)
                 {
                     return;
                 }
 
-                var body = ea.Body.ToArray();
+                var body = args.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
-                Dictionary<string, object> headers = (Dictionary<string, object>)ea.BasicProperties.Headers;
-                var correlationId = ea.BasicProperties.CorrelationId;
+                var headers = args.BasicProperties.Headers;
+                if (headers == null)
+                {
+                    return;
+                }
+
+                var correlationId = args.BasicProperties.CorrelationId;
                 var convertedHeaders = headers.ToDictionary(
                     kvp => kvp.Key,
-                    kvp => kvp.Value is byte[] byteArray ? Encoding.UTF8.GetString(byteArray) : kvp.Value
-);
+                    kvp => kvp.Value is byte[] byteArray ? Encoding.UTF8.GetString(byteArray) : kvp.Value);
 
                 bool handled = false;
 
@@ -94,23 +97,21 @@ public class RequestConsumerService : BackgroundService, IDisposable
 
                 if (handled)
                 {
-                    await _channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
+                    await _channel.BasicAckAsync(args.DeliveryTag, multiple: false);
                 }
                 else
                 {
-                    await _channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
+                    await _channel.BasicNackAsync(args.DeliveryTag, multiple: false, requeue: false);
                 }
 
             }
             catch (Exception ex)
             {
-                await _channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: true);
+                await _channel.BasicNackAsync(args.DeliveryTag, multiple: false, requeue: true);
             }
         };
 
         await _channel.BasicConsumeAsync(queue: _queueName, autoAck: false, consumer: consumer);
-        await Task.CompletedTask;
-
     }
 
     public override async void Dispose()

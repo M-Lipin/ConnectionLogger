@@ -1,52 +1,33 @@
 ﻿using ConnectionLogger.Data.Services;
 using ConnectionLogger.Messaging.Messages;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 [ApiController]
 [Route("api/connections")]
 public class ConnectionsController : ControllerBase
 {
-    protected readonly ILogger<UserController> _logger;
-    private readonly IDataService _dataService;
+    private readonly IConnectionService _dataService;
 
-    public ConnectionsController(IDataService dataService, ILogger<UserController> logger)
+    public ConnectionsController(IConnectionService dataService)
     {
-        _logger = logger;
         _dataService = dataService;
     }
 
-    [HttpGet("search")]
-    public async Task<IActionResult> SearchConnections([FromQuery] long userId, [FromQuery] string orderBy = "dateCreated", [FromQuery] string direction = "desc")
+    [HttpGet]
+    public async Task<IActionResult> GetConnections([FromQuery] long userId, [FromQuery] string orderBy = "DateCreated", [FromQuery] string direction = "Desc")
     {
-        if (!Enum.TryParse(orderBy, true, out OrderBy convertedOrderBy))
+        if (!Enum.TryParse(orderBy, true, out OrderBy orderByValue))
         {
             return BadRequest(new { message = $"orderBy must equal one of the following strings: {string.Join(", ", Enum.GetNames(typeof(OrderBy)))}" });
         }
 
-        if (!Enum.TryParse(direction, true, out Direction convertedDirection))
+        if (!Enum.TryParse(direction, true, out Direction directionValue))
         {
             return BadRequest(new { message = $"direction must equal one of the following strings: {string.Join(", ", Enum.GetNames(typeof(Direction)))}" });
         }
 
-        var message = new SearchConnectionsMessage()
-        {
-            Direction = convertedDirection,
-            OrderBy = convertedOrderBy,
-            UserId = userId
-        };
+        var result = await _dataService.GetConnectionsAsync(userId, orderByValue, directionValue);
 
-        var result = await _dataService.GetLatestConnectionAsync(message.UserId, message.OrderBy, message.Direction);
-        var ip = await _dataService.GetAddressAsync(result.IpAddressId);
-        var viewResult = new ConnectMessage()
-        {
-            UserId = result.UserId,
-            ConnectedAt = result.ConnectedAt,
-            Ip = ip.Address
-        };
-
-        string responseJson = JsonSerializer.Serialize(viewResult);
-
-        return Ok(responseJson);
+        return Ok(result);
     }
 }

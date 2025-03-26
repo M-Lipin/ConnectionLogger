@@ -1,5 +1,4 @@
 ﻿using ConnectionLogger.AsyncReceiver.Configurations;
-using ConnectionLogger.AsyncReceiver.Interfaces;
 using ConnectionLogger.Messaging.Configurations;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
@@ -46,13 +45,13 @@ public class RequestProducerService : IRequestProducer, IDisposable
             arguments: null).Wait();
     }
 
-    public async Task SendAsync(object obj, string correlationId, Dictionary<string, object> headers)
+    public async Task SendAsync(object obj, string correlationId, Dictionary<string, object?> headers)
     {
         var message = JsonSerializer.Serialize(obj);
         await SendAsync(message, correlationId, headers);
     }
 
-    public async Task SendAsync(string message, string correlationId, Dictionary<string, object>? headers)
+    public async Task SendAsync(string message, string correlationId, Dictionary<string, object?> headers)
     {
         await _channel.QueueBindAsync(
             queue: _queueName,

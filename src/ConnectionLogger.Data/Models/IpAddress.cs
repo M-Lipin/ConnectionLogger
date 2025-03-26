@@ -2,16 +2,16 @@
 
 namespace ConnectionLogger.Data.Models;
 
-public class IpAddress
+public record IpAddress
 {
     [Key]
-    public long Id { get; set; }
+    public long Id { get; init; }
 
     [MaxLength(45)]
     [Required]
-    public required string Address { get; set; }
+    public required string Address { get; init; }
 
     [MaxLength(15)]
     [Required]
-    public required string Protocol { get; set; }
+    public required string Protocol { get; init; }
 }

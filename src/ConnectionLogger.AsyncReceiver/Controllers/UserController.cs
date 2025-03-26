@@ -1,5 +1,5 @@
 ﻿using ConnectionLogger.AsyncReceiver.Controllers.Models;
-using ConnectionLogger.AsyncReceiver.Interfaces;
+using ConnectionLogger.AsyncReceiver.Services;
 using ConnectionLogger.Messaging.Messages;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;

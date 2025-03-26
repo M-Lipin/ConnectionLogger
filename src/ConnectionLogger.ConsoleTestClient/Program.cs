@@ -2,6 +2,8 @@
 using System.Text;
 using System.Text.Json;
 
+namespace ConnectionLogger.ConsoleTestClient;
+
 public class Program
 {
     private static readonly HttpClient client = new HttpClient();
@@ -9,10 +11,10 @@ public class Program
 
     static async Task Main()
     {
-
         Console.Write("Порт (https://localhost:<port>) :");
         int port = int.Parse(Console.ReadLine() ?? "7007");
         host += port;
+
         Console.Write("Количество запросов: ");
         int requestCount = int.Parse(Console.ReadLine() ?? "10");
 
@@ -88,35 +90,5 @@ public class Program
         {
             semaphore.Release();
         }
-    }
-}
-
-public static class IpGenerator
-{
-    private static readonly Random random = new Random();
-    private const string hexChars = "0123456789abcdef";
-
-    public static string GenerateIPv4()
-    {
-        return $"{random.Next(0, 256)}.{random.Next(0, 256)}.{random.Next(0, 256)}.{random.Next(0, 256)}";
-    }
-
-    public static string GenerateIPv6()
-    {
-        var ipv6 = new StringBuilder();
-        for (int i = 0; i < 8; i++)
-        {
-            for (int j = 0; j < 4; j++)
-            {
-                ipv6.Append(hexChars[random.Next(hexChars.Length)]);
-            }
-
-            if (i < 7)
-            {
-                ipv6.Append(':');
-            }
-        }
-
-        return ipv6.ToString();
     }
 }
