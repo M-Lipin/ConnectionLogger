@@ -14,8 +14,8 @@ public class UserService : IUserService
     public async Task<List<long>> SearchUsersByIpPartAsync(string ipPart, string protocol)
     {
         return await _dbContext.Connections
-            .OrderBy(c => c.IpAddress.Protocol)
-            .Where(c => c.IpAddress.Address.Contains(ipPart) && c.IpAddress.Protocol == protocol)
+            .Include(c => c.IpAddress)
+            .Where(c => c.IpAddress.Address.StartsWith(ipPart) && c.IpAddress.Protocol == protocol)
             .Select(c => c.UserId)
             .Distinct()
             .ToListAsync();
