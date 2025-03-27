@@ -27,7 +27,8 @@ public class RequestConsumerService : BackgroundService, IDisposable
         _rabbitMqSettings = _appSettings.RabbitMQ;
         _queueName = _appSettings.RabbitMQ.RequestQueue;
 
-        Task.Run(InitializeComponentsAsync).Wait();        
+        // TODO: Refactor.
+        Task.Run(InitializeComponentsAsync).Wait();
     }
 
     private async Task InitializeComponentsAsync()
