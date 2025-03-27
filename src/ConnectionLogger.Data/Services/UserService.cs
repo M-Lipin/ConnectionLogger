@@ -2,7 +2,7 @@
 
 namespace ConnectionLogger.Data.Services;
 
-public class UserService
+public class UserService : IUserService
 {
     private readonly AppDbContext _dbContext;
 
@@ -11,7 +11,7 @@ public class UserService
         _dbContext = dbContext;
     }
 
-    public async Task<List<long>> GetUsersByIpAsync(string ipPart, string protocol)
+    public async Task<List<long>> SearchUsersByIpPartAsync(string ipPart, string protocol)
     {
         return await _dbContext.Connections
             .OrderBy(c => c.IpAddress.Protocol)

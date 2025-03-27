@@ -42,6 +42,7 @@ services:
       - connection_logger_network
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+
   connectionlogger_api:
     build:
       context: .
@@ -62,6 +63,7 @@ services:
       restart_policy:
         condition: none
     entrypoint: ["sh", "-c", "sleep 30 && dotnet ConnectionLogger.Api.dll"]
+
   connectionlogger_asyncreceiver:
     build:
       context: .
