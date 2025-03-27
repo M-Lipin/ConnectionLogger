@@ -11,26 +11,29 @@ public class Program
 
     static async Task Main()
     {
-        Console.Write("Порт (https://localhost:<port>) :");
+        Console.Write("Specify port (https://localhost:<port>) :");
         int port = int.Parse(Console.ReadLine() ?? "7007");
         host += port;
 
-        Console.Write("Количество запросов: ");
+        Console.Write("Specify the number of requests: ");
         int requestCount = int.Parse(Console.ReadLine() ?? "10");
 
-        Console.Write("Минимальное userId, которое будет использоваться: ");
-        int userIdStart = int.Parse(Console.ReadLine() ?? "1000");
+        // Console.Write("Specify userId min value: ");
+        // int userIdStart = int.Parse(Console.ReadLine() ?? "1000");
+        int userIdStart = 1000;
 
-        Console.Write("Максимальное userId, которое будет использоваться: ");
-        int userIdFinish = int.Parse(Console.ReadLine() ?? "10000");
+        // Console.Write("Specify userId max value: ");
+        // int userIdFinish = int.Parse(Console.ReadLine() ?? "10000");
+        int userIdFinish = 10000;
 
-        Console.Write("Задержка перед каждым запросом (в миллисекундах): ");
+        Console.Write("Specify the delay between requests (in milliseconds): ");
         int delayMs = int.Parse(Console.ReadLine() ?? "0");
 
-        Console.Write("Максимальное количество параллельных запросов: ");
-        int maxConcurrency = int.Parse(Console.ReadLine() ?? "100");
+        // Console.Write("Specify the maximum concurrency: ");
+        // int maxConcurrency = int.Parse(Console.ReadLine() ?? "100");
+        int maxConcurrency = 10;
 
-        Console.WriteLine("Запуск теста...");
+        Console.WriteLine("Starting test...");
 
         var results = new List<string>();
 
@@ -45,9 +48,11 @@ public class Program
             Console.WriteLine(result);
         }
 
-        Console.WriteLine($"Все запросы отправлены! Время выполнения: {stopwatch.Elapsed.TotalSeconds:F2} секунд.");
+        Console.WriteLine($"All requests have been sent! Execution time: {stopwatch.Elapsed.TotalSeconds:F2} seconds.");
 
-        Console.ReadLine();
+        Console.WriteLine("Press any key to exit.");
+
+        Console.ReadKey();
     }
 
     static async Task RunTestAsync(int requestCount, int userIdStart, int userIdFinish, int delayMs, int maxConcurrency, List<string> results)
@@ -80,11 +85,11 @@ public class Program
             var response = await client.PostAsync($"{host}/api/users/{userId}/connect", content);
             string responseBody = await response.Content.ReadAsStringAsync();
 
-            results.Add($"Ответ от {userId}: Статус {response.StatusCode}, Тело ответа: {responseBody}");
+            results.Add($"The response for UserId {userId}: Status {response.StatusCode}, Response body: {responseBody}");
         }
         catch (Exception ex)
         {
-            results.Add($"Ошибка при запросе для {userId}: {ex.Message}");
+            results.Add($"An error when sending request for UserId {userId}: {ex.Message}");
         }
         finally
         {

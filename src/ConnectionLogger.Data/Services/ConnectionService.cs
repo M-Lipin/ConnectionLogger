@@ -62,6 +62,8 @@ public class ConnectionService : IConnectionService
             await _dbContext.Connections.AddAsync(connection);
             await _dbContext.SaveChangesAsync();
 
+            await transaction.CommitAsync();
+
             return connection;
         }
         catch (Exception ex)
