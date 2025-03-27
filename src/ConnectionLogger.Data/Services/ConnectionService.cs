@@ -75,7 +75,10 @@ public class ConnectionService : IConnectionService
 
     public async Task<List<Connection>> GetConnectionsAsync(long userId, OrderBy orderBy, Direction direction)
     {
-        var query = _dbContext.Connections.AsQueryable();
+        var query = _dbContext.Connections
+                    .Include(c => c.User)
+                    .Include(c => c.IpAddress)
+                    .AsQueryable();
 
         query = query.Where(c => c.UserId == userId);
 
